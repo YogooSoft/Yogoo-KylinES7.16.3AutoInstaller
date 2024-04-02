@@ -12,7 +12,6 @@ libattr-devel-2.4.48-15.ky10.x86_64.rpm
 libkysec-devel-3.3.6-33.se.26.ky10.x86_64.rpm
 libsecurity1-devel-1.1-17.se.07.ky10.x86_64.rpm
 libxcrypt-devel-4.4.16-2.ky10.x86_64.rpm
-list
 python-meld3-0.6.10-1.el7.x86_64.rpm
 python2-2.7.18-1.se.05.p03.ky10.x86_64.rpm
 python2-debug-2.7.18-1.se.05.p03.ky10.x86_64.rpm
