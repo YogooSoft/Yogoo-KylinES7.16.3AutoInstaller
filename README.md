@@ -326,7 +326,7 @@ path_base=/opt/elk
 supervisor_use_systemd=true
 running_user=elk
 url_username=elk
-url_password=elk@20210401
+url_password=e******01
 kibana_username=kibana
 kibana_password=Fg9******lIJ
 xpack_security=true
@@ -360,10 +360,10 @@ PUT _security/role/writer
 } 
 PUT _security/user/writer
 {  
-  "password" : "writer@20240301",  
+  "password" : "wr******01",  
   "roles" : [ "writer"],  
   "full_name" : "writer",  
-  "email" : "wangyf@bitian.cn"  
+  "email" : "w****f@bitian.cn"  
 }
 ```
 ### 7.4 启用monitoring
