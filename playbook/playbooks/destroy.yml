@@ -1,0 +1,56 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-06
+#
+#
+#===============================================================================================
+- name: Do destroy
+  hosts: "{{ hosts | default('all') }}"
+  tasks:
+   - name: Print copyright information
+     run_once: true
+     debug: 
+      msg: "{{['###########################################################', 
+      '#                                                         #', 
+      '#  Yogoo ELK Ansible Automation Deployment V1.5           #', 
+      '#  Copyright 2020-2024 Shanghai Yogoo Software Co., Ltd.  #',
+      '#                                                         #',
+      '#  www.yogoo.net                                          #',
+      '#                                                         #', 
+      '###########################################################']  }}"
+
+- hosts: "{{ hosts | default('all') }}"
+  tasks:
+    - fail: msg="hosts should be defined with '-e hosts=xxx'"
+      when: hosts is undefined
+    - name: Destroy supervisord
+      ignore_errors: true
+      shell: >-
+        systemctl stop {{ supervisor_service_name | default('supervisord') }};
+        systemctl disable {{ supervisor_service_name | default('supervisord') }};
+        ps aux | grep /opt/elk/supervisor | grep -v grep | awk '{print $2}' | xargs kill -9;
+        rm -f /etc/systemd/system/{{ supervisor_service_name | default('supervisord') }}.service;
+        rm -f /etc/systemd/system/multi-user.target.wants/{{ supervisor_service_name | default('supervisord') }}.service;
+        rm -f /usr/lib/systemd/system/{{ supervisor_service_name | default('supervisord') }}.service;
+        rm -f /usr/bin/{{ supervisorctl_name | default('supervisorctl') }};
+        yum remove supervisor.noarch -y;
+        yum remove python-meld3.x86_64 -y; 
+        systemctl daemon-reload;
+
+    - name: Remove path_base
+      file:
+        path: "{{ path_base | default('/opt/elk') }}"
+        state: absent
+
+    - name: Remove path_data
+      when: with_data is defined and with_data|bool and path_data is defined
+      file:
+        path: "{{ path_data }}"
+        state: absent

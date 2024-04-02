@@ -1,0 +1,29 @@
+- name: Turn off shard allocation
+  when: (run_once_on_stopped_but_running or run_once_on_soft_stopped_but_running or run_once_on_absent_but_running)
+  shell: "curl -k -u '{{ es_exec_username }}:{{ es_exec_password }}' -m 10 -XPUT {{ es_address }}/_cluster/settings -H 'Content-Type: application/json' -d '{\"transient\" : {\"cluster.routing.allocation.enable\" : \"primaries\" }}'"
+  register: response
+  retries: 30
+  delay: 2
+  until: response.stdout.find('"acknowledged":true') != -1
+  failed_when: response.stdout.find('"acknowledged":true') == -1
+
+- name: Do stop
+  ignore_errors: true
+  command: "cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf  stop {{ service_name }}"
+
+- name: "Remove service file {{ supervisor_path_conf }}/{{ service_name }}.conf"
+  file:
+    path: "{{ supervisor_path_conf }}/{{ service_name }}.conf"
+    state: absent
+
+- name: Run or reload supervisord
+  shell: |
+    if [ -f {{ supervisor_path_home }}/supervisord.pid ] && ps -p `cat {{ supervisor_path_home }}/supervisord.pid` > /dev/null; then
+      cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf  reread && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf update
+    else
+      {% if supervisor_use_systemd|bool %}
+      sudo systemctl start supervisord
+      {% else %}
+      cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf -d
+      {% endif %}
+    fi

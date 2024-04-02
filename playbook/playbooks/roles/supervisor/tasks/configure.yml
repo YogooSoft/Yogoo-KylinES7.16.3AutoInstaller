@@ -1,0 +1,24 @@
+- name: "Template supervisord systemd file to {{ supervisor_service_name }}.service"
+  when: supervisor_use_systemd|bool and run_once_per_host
+  become: true
+  template:
+    src: supervisord.service.j2
+    dest: "/etc/systemd/system/{{ supervisor_service_name }}.service"
+
+- name: Systemd enable
+  when: supervisor_use_systemd|bool and run_once_per_host
+  become: true
+  shell: "systemctl daemon-reload && systemctl enable {{ supervisor_service_name }}"
+
+- name: Template supervisord config file
+  when: run_once_per_host
+  template:
+    src: supervisord.conf.j2
+    dest: "{{ supervisor_path_home }}/supervisord.conf"
+
+- name: Template supervisorcli
+  when: run_once_per_host
+  template:
+    src: supervisorctl.j2
+    dest: "{{ supervisor_path_home }}/supervisorctl"
+    mode: "+x"

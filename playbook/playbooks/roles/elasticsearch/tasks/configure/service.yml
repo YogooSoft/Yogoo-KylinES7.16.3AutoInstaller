@@ -1,0 +1,4 @@
+- name: Template elasticsearch supervisor config file
+  template:
+    src: supervisor/elasticsearch.conf.j2
+    dest: "{{ supervisor_path_conf }}/{{ service_name }}.conf"

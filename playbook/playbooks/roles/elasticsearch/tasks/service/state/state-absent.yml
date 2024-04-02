@@ -1,0 +1,16 @@
+- import_tasks: state-stopped.yml
+
+- name: Check deleted direcory existence
+  stat:
+    path: "{{ path_home }}.deleted"
+  register: result_deleted_directory_existence
+
+- name: "Deleting deleted directory {{ path_home }}.deleted"
+  when: result_deleted_directory_existence.stat.exists == true
+  file:
+    owner: "{{ running_user | default(ansible_user_id) }}"
+    path: "{{ path_home }}.deleted"
+    state: absent
+
+- name: "Move path home dir from {{ path_home }} to {{ path_home }}.deleted"
+  shell: "mv {{ path_home }} {{ path_home }}.deleted"

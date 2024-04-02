@@ -1,0 +1,17 @@
+- name: Check service status
+  shell: "cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf  status {{ service_name }}"
+  register: result_service_status
+
+- name: Assign files to new users   
+  become: yes
+  file:
+    path: "{{path_base}}"
+    state: directory
+    mode: 0755
+    owner: "{{running_user}}"
+    group: "{{running_user}}"
+    recurse: yes
+
+- name: Do start
+  when: result_service_status.stdout.find('RUNNING') == -1 and result_service_status.stdout.find('STARTING') == -1
+  shell: "cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf  start {{ service_name }}"

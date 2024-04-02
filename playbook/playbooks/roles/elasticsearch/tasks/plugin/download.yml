@@ -1,0 +1,70 @@
+---
+#===============================================================================================
+##
+##  悦高软件-- ansible ELK 部署 Playbook
+##
+##  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+##-----------------------------------------------------------------------------------------------
+##  建立日期：2019-09-10
+##
+##  版 本 号：V1.5.2           更新日期:2024-03-05
+##
+##
+##===============================================================================================
+
+- name: Check elasticsearch-analysis-ik already downloaded
+  when: run_once_per_host
+  stat:
+    path: "{{ path_packages }}/elasticsearch-analysis-ik-{{ version }}"
+  register: result_downloaded
+
+- name: "Download elasticsearch-analysis-ik from {{ download_url }}/{{ ik_filename }}"
+  when: run_once_per_host and result_downloaded.stat.exists == false
+  get_url:
+    url: "{{ download_url }}/{{ ik_filename }}"
+    dest: "{{ path_tmp }}/{{ ik_filename }}"
+    #url_username: "{{ url_username }}"
+    #url_password: "{{ url_password }}"
+
+# - name: Check elasticsearch-analysis-pinyin already downloaded
+#   when: run_once_per_host
+#   stat:
+#     path: "{{ path_packages }}/elasticsearch-analysis-pinyin-{{ version }}"
+#   register: result_downloaded
+
+# - name: "Download elasticsearch-analysis-pinyin from {{ download_url }}/{{ pinyin_filename }}"
+#   when: run_once_per_host and result_downloaded.stat.exists == false
+#   get_url:
+#     url: "{{ download_url }}/{{ pinyin_filename }}"
+#     dest: "{{ path_tmp }}/{{ pinyin_filename }}"
+    #url_username: "{{ url_username }}"
+    #url_password: "{{ url_password }}"
+
+# - name: Check repository-hdfs already downloaded
+#   when: run_once_per_host
+#   stat:
+#     path: "{{ path_packages }}/repository-hdfs-{{ version }}"
+#   register: result_downloaded
+
+# - name: "Download repository-hdfs from {{ download_url }}/{{ rep_hdfs_filename }}"
+#   when: run_once_per_host and result_downloaded.stat.exists == false
+#   get_url:
+#     url: "{{ download_url }}/{{ rep_hdfs_filename }}"
+#     dest: "{{ path_tmp }}/{{ rep_hdfs_filename }}"
+#     #url_username: "{{ url_username }}"
+#     #url_password: "{{ url_password }}"
+
+# - name: Check repository-s3 already downloaded
+#   when: run_once_per_host  and version is version("8.0.0", "<")
+#   stat:
+#     path: "{{ path_packages }}/repository-s3-{{ version }}"
+#   register: result_downloaded
+
+# - name: "Download repository-s3 from {{ download_url }}/{{ rep_s3_filename }}"
+#   when: run_once_per_host and result_downloaded.stat.exists == false
+#   get_url:
+#     url: "{{ download_url }}/{{ rep_s3_filename }}"
+#     dest: "{{ path_tmp }}/{{ rep_s3_filename }}"
+#     #url_username: "{{ url_username }}"
+#     #url_password: "{{ url_password }}"
+

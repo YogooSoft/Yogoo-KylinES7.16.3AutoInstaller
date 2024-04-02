@@ -1,0 +1,22 @@
+[supervisord]
+logfile={{ supervisor_path_logs }}/supervisord.log
+logfile_maxbytes=100MB
+logfile_backups=5
+pidfile = {{ supervisor_path_home }}/supervisord.pid
+
+minfds=100000
+minprocs=4096
+
+
+[inet_http_server]
+port=0.0.0.0:{{ supervisor_http_port }}
+
+[supervisorctl]
+serverurl=http://0.0.0.0:{{ supervisor_http_port }}
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+
+[include]
+files = {{ supervisor_path_conf }}/*.conf

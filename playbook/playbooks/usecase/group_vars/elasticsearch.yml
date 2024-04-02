@@ -1,0 +1,4 @@
+config:
+  bootstrap:
+    memory_lock: false
+    system_call_filter: false

@@ -1,0 +1,34 @@
+- name: Set exclude hosts
+  when: (run_once_on_stopped_but_running or run_once_on_absent_but_running) and presented_inventory|length > 0
+  set_fact:
+    exclude_hosts: >-
+      [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+      {% if (host['state'] is defined and host['state'] in ['absent', 'stopped']) and (host['roles'] is undefined or 'data' in host['roles']) %}
+      "{{ host['node_name'] | default([host['project_name'], host['zone'], host['inventory_hostname'], host['ansible_hostname']] | select('defined') | select('ne', '') | join('-')) }}"{{ ',' if not loop.last else '' }}
+      {% endif %}
+      {% endfor %}]
+
+- name: Ensure server is excluded
+  when: (run_once_on_stopped_but_running or run_once_on_absent_but_running) and presented_inventory|length > 0
+  shell: >-
+    curl -k -m 10 -u '{{ es_exec_username }}:{{ es_exec_password }}'
+    -XPUT {{ es_address }}/_cluster/settings
+    -H 'Content-Type: application/json'
+    -d '{"transient": { "cluster.routing.allocation.exclude._name": "{{ exclude_hosts | join(',') }}"}}'
+  register: response
+  retries: 30
+  delay: 2
+  until: response.stdout.find('"acknowledged":true') != -1
+  failed_when: response.stdout.find('"acknowledged":true') == -1
+
+- name: Ensure the node has no shards left
+  when: (run_once_on_stopped_but_running or run_once_on_absent_but_running) and presented_inventory|length > 0
+  shell: >-
+    curl -k -m 10 -u '{{ es_exec_username }}:{{ es_exec_password }}' {{ es_address }}/_cat/shards | grep -c -E '{{ exclude_hosts | join('|') }}' || true
+  register: response
+  retries: 86400
+  delay: 10
+  until: response.stdout == '0'
+  failed_when: response.stdout != '0'
+
+- import_tasks: state-soft-stopped.yml

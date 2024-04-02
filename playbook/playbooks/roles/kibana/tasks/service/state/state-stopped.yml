@@ -1,0 +1,15 @@
+- name: Do stop
+  ignore_errors: true
+  command: "{{ supervisor_path_home }}/supervisord -c {{ supervisor_path_home }}/supervisord.conf ctl stop {{ service_name }}"
+
+- name: Run or reload supervisord
+  shell: |
+    if [ -f {{ supervisor_path_home }}/supervisord.pid ] && ps -p `cat {{ supervisor_path_home }}/supervisord.pid` > /dev/null; then
+      cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf reread && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf update
+    else
+      {% if supervisor_use_systemd|bool %}
+      sudo systemctl start supervisord
+      {% else %}
+      cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf -d
+      {% endif %}
+    fi

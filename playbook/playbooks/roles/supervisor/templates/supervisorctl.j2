@@ -1,0 +1,93 @@
+#!/bin/bash
+USER={{ ansible_user_id }}
+
+supervisor_reload(){
+  SCRIPT_DIR=$1
+  if [ -f ${SCRIPT_DIR}/supervisord.pid ] && ps -p `cat ${SCRIPT_DIR}/supervisord.pid` > /dev/null 2>&1; then
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl reload
+  else
+    {% if supervisor_use_systemd is defined and supervisor_use_systemd %}
+    sudo systemctl restart supervisord
+    {% else %}
+    cd ${SCRIPT_DIR}; ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf -d
+    {% endif %}
+  fi
+}
+
+supervisor_status(){
+  SCRIPT_DIR=$1
+  SERVICE_NAME=$2
+  ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl status|grep ${SERVICE_NAME} | while read -r line; do
+    real_name=`echo ${line%%:*}|sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"`
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl status $real_name
+  done
+}
+
+supervisor_restart(){
+  SCRIPT_DIR=$1
+  SERVICE_NAME=$2
+  ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl status|grep ${SERVICE_NAME} | while read -r line; do
+    real_name=`echo ${line%%:*}|sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"`
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl stop $real_name
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl start $real_name
+  done
+}
+
+supervisor_start(){
+  SCRIPT_DIR=$1
+  SERVICE_NAME=$2
+  ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl status|grep ${SERVICE_NAME} | while read -r line; do
+    real_name=`echo ${line%%:*}|sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"`
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl start $real_name
+  done
+}
+
+supervisor_stop(){
+  SCRIPT_DIR=$1
+  SERVICE_NAME=$2
+  ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl status|grep ${SERVICE_NAME} | while read -r line; do
+    real_name=`echo ${line%%:*}|sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"`
+    ${SCRIPT_DIR}/supervisord -c ${SCRIPT_DIR}/supervisord.conf ctl stop $real_name
+  done
+}
+
+SCRIPT=$(readlink -f $0)
+SCRIPT_DIR=$(dirname "$SCRIPT")
+
+#if [ ! -n "$2" ] && [ "$1" != "status" ]; then
+if [ ! -n "$2" ]; then
+  #echo "usage: supervisorctl start|stop|restart|status elasticsearch|kibana|..."
+  #exit 1
+  SERVICE_NAME=":"
+else
+  SERVICE_NAME=$2
+fi
+
+case $1 in
+  status)
+    ACTION=supervisor_status
+    ;;
+  start)
+    ACTION=supervisor_start
+    ;;
+  stop)
+    ACTION=supervisor_stop
+    ;;
+  restart)
+    ACTION=supervisor_restart
+    ;;
+  *)
+    echo "usage: supervisorctl start|stop|restart|status [elasticsearch|kibana|...]"
+    exit 1
+    ;;
+esac
+
+if [ `whoami` != "$USER" ]; then
+  export -f supervisor_reload
+  export -f $ACTION
+  su $USER -c "supervisor_reload $SCRIPT_DIR"
+  su $USER -c "$ACTION $SCRIPT_DIR $SERVICE_NAME"
+else
+  supervisor_reload $SCRIPT_DIR
+  $ACTION $SCRIPT_DIR $SERVICE_NAME
+fi

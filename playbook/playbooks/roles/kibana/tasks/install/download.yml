@@ -1,0 +1,51 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+- name: Check kibana already downloaded
+  stat:
+    path: "{{ path_packages }}/kibana-{{ version }}-linux-x86_64"
+  register: result_downloaded
+
+- name: "Download kibana from {{ download_url }}/{{ filename }}"
+  when: result_downloaded.stat.exists == false
+  get_url:
+    url: "{{ download_url }}/{{ filename }}"
+    dest: "{{ path_tmp }}/{{ filename }}"
+
+- name: Unarchive kibana
+  when: result_downloaded.stat.exists == false
+  unarchive:
+    owner: "{{ running_user | default(ansible_user_id) }}"
+    src: "{{ path_tmp }}/{{ filename }}"
+    dest: "{{ path_packages }}"
+    remote_src: true
+
+- name: Create symbolic link version<8.0.0
+  when: version is version("8.0.0", "<")
+  # when: version == '7.16.3'
+  file:  
+    owner: "{{ running_user | default(ansible_user_id) }}"
+    src: "{{ path_packages }}/kibana-{{ version }}-linux-x86_64"
+    #src: "{{ path_packages }}/kibana-{{ version }}"
+    dest: "{{ path_home }}"
+    state: link
+- name: Create symbolic link version>8.0.0
+  when: version is version("8.0.0", ">")
+  # when: version == '8.9.2'
+  file:
+    owner: "{{ running_user | default(ansible_user_id) }}"
+    # src: "{{ path_packages }}/kibana-{{ version }}-linux-x86_64"
+    src: "{{ path_packages }}/kibana-{{ version }}"
+    dest: "{{ path_home }}"
+    state: link

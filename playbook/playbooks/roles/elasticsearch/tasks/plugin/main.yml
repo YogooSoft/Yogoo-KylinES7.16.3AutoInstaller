@@ -1,0 +1,16 @@
+---
+
+# download plugin files from url
+- name: Download plugins
+  import_tasks: download.yml
+
+- name: Install plugins
+  import_tasks: plugins.yml
+
+# plugin may generate some setting files
+- name: Copy default configs
+  copy:
+    src: "{{ path_home }}/elasticsearch/config"
+    dest: "{{ path_home }}"
+    remote_src: true
+

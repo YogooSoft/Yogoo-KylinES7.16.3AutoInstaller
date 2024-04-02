@@ -1,0 +1,16 @@
+[program:{{ service_name }}]
+{% if running_user is defined %}
+user={{ running_user }}
+{% endif %}
+command={{ path_home }}/bin/kibana
+environment=NODE_OPTIONS="--max_old_space_size={{ kibana_heap_size }}"
+autostart={{ 'true' if state == 'present' else 'false' }}
+autorestart=unexpected
+startsecs=10
+startretries=3
+stdout_logfile={{ path_logs }}/stdout.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+stderr_logfile={{ path_logs }}/stderr.log
+stderr_logfile_maxbytes=50MB
+stderr_logfile_backups=10

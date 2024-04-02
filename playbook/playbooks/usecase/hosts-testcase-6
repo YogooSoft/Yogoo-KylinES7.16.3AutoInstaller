@@ -1,0 +1,22 @@
+[all:vars]
+ansible_user=centos
+ansible_ssh_private_key_file=~/.ssh/sbux_id_rsa
+ansible_become=true
+version=7.9.2
+project_name=my_project
+xpack_security=true
+running_user=elk
+supervisor_use_systemd=true
+
+
+[elasticsearch:vars]
+jvm_heap_memory=256m
+
+#plugins=[{'name':'analysis-ik','url':'https://s3.cn-north-1.amazonaws.com.cn/puxiang-public-packages/repos/elasticsearch-plugins/elasticsearch-analysis-ik-7.9.2.zip'}]
+plugins=[{'name':'analysis-ik','url':'https://s3.cn-north-1.amazonaws.com.cn/puxiang-public-packages/repos/elasticsearch-plugins/elasticsearch-analysis-ik-7.9.2.zip'}, {'name':'repository-s3','url':'https://s3.cn-north-1.amazonaws.com.cn/puxiang-public-packages/repos/elasticsearch-plugins/repository-s3-7.9.2.zip'}]
+
+[elasticsearch]
+es-1  ansible_host=54.222.213.239 server_host=172.31.18.164 http_port=9200 transport_port=9300
+es-2  ansible_host=52.80.165.74 server_host=172.31.19.30 http_port=9200 transport_port=9300
+es-3  ansible_host=54.223.152.188 server_host=172.31.24.67 http_port=9200 transport_port=9300
+

@@ -1,0 +1,50 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+# Check kibana settings
+
+- block:
+    - name: project_name checks
+      fail: msg="project_name must be specified and cannot be blank"
+      when: project_name is undefined or project_name == ''
+
+    - name: multiple instances checks
+      fail: msg="kibana should not be deployed as multiple instances on single host"
+      when: (groups['kibana']|map('extract', hostvars)|selectattr('ansible_host', 'eq', ansible_host)|list)|length > 1
+
+    - name: variable checks - config
+      fail: msg="variable config should be a mapping"
+      when: config is defined and config is not mapping
+  any_errors_fatal: true
+
+- name: Check service deploy status
+  stat:
+    path: "{{ supervisor_path_conf }}/{{ service_name }}.conf"
+  register: result_deploy
+
+- name: Set service deploy status
+  when: result_deploy.stat.exists == true
+  set_fact:
+    is_service_deployed: true
+
+- name: Check service running status
+  when: is_service_deployed
+  # shell: "{{ supervisor_path_home }}/supervisord -c {{ supervisor_path_home }}/supervisord.conf ctl status {{ service_name }}"
+  shell: " cd {{ supervisor_path_home }} && supervisorctl -c {{ supervisor_path_home }}/supervisord.conf  status {{ service_name }}"
+  register: result_running
+
+- name: Set service running status
+  when: is_service_deployed and ( result_running.stdout.lower().find('running') != -1 or result_running.stdout.lower().find('starting') != -1 )
+  set_fact:
+    is_service_running: true

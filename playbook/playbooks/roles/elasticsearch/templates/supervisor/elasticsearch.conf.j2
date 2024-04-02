@@ -1,0 +1,16 @@
+[program:{{ service_name }}]
+{% if running_user is defined %}
+user={{ running_user }}
+{% endif %}
+command={{ path_home }}/elasticsearch/bin/elasticsearch {{ '-Epath.conf='~path_conf if version is version('6.0.0', '<') else '' }}
+environment=JAVA_HOME={{ java_home | default(path_home~'/jdk') }},ES_PATH_CONF={{ path_conf }},ES_JVM_OPTIONS={{ path_conf }}/jvm.options
+autostart={{ 'true' if state == 'present' else 'false' }}
+autorestart=unexpected
+startsecs=10
+startretries=3
+stdout_logfile={{ path_logs }}/stdout.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=10
+stderr_logfile={{ path_logs }}/stderr.log
+stderr_logfile_maxbytes=50MB
+stderr_logfile_backups=10

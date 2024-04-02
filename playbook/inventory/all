@@ -1,0 +1,9 @@
+es126 ansible_host=172.168.0.126
+es127 ansible_host=172.168.0.127
+es128 ansible_host=172.168.0.128
+es129 ansible_host=172.168.0.129
+es130 ansible_host=172.168.0.130
+es131 ansible_host=172.168.0.131
+es132 ansible_host=172.168.0.132
+es133 ansible_host=172.168.0.133
+es134 ansible_host=172.168.0.134

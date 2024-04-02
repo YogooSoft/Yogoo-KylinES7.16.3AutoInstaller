@@ -1,0 +1,76 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+output: []
+
+filename: "elasticsearch-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '-linux-x86_64' }}.tar.gz"
+ik_filename: "elasticsearch-analysis-ik-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '' }}.zip"
+pinyin_filename: "elasticsearch-analysis-pinyin-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '' }}.zip"
+rep_hdfs_filename: "repository-hdfs-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '' }}.zip"
+siren_filename: "siren-federate-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '' }}-20.1-proguard-plugin.zip"
+rep_s3_filename: "repository-s3-{{ '' if not use_oss|bool or version is version('6.3.0', '<') else 'oss-' }}{{ version }}{{ '' if version is version('7.0.0', '<') else '' }}.zip"
+
+xpack: "{{ (version is version('6.3.0', '>=') and not use_oss|bool) or 'xpack' in (plugins|map(attribute='name')|list) }}"
+
+presented_inventory_on_host: "{{ ansible_play_hosts_all|map('extract', hostvars)|selectattr('ansible_host', 'eq', ansible_host)|selectattr('state', 'undefined')|map(attribute='inventory_hostname')|list + ansible_play_hosts_all|map('extract', hostvars)|selectattr('ansible_host', 'eq', ansible_host)|selectattr('state', 'defined')|selectattr('state', 'eq', 'present')|map(attribute='inventory_hostname')|list }}"
+run_once_per_host: "{{ presented_inventory_on_host|length > 0 and (presented_inventory_on_host|first == inventory_hostname) }}"
+presented_inventory: "{{ (ansible_play_hosts_all|map('extract', hostvars)|selectattr('state', 'undefined')|list + ansible_play_hosts_all|map('extract', hostvars)|selectattr('state', 'defined')|selectattr('state', 'eq', 'present')|list)|map(attribute='inventory_hostname')|list }}"
+run_once_on_present: "{{ presented_inventory|length > 0 and (presented_inventory|first == inventory_hostname) }}"
+is_service_deployed: false
+is_service_running: false
+
+es_address: "{{ 'https' if xpack|bool and xpack_security|bool and xpack_security_https|bool else 'http' }}://{{ server_host }}:{{ http_port | default(9200) }}"
+es_hosts: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  {% if (host['state'] is undefined or host['state'] == 'present') and (host['roles'] is undefined or 'coordinating' in host['roles']) %}
+  "{{ 'https' if xpack|bool and xpack_security|bool and xpack_security_https|bool else 'http' }}://{{ host['server_host'] if 'server_host' in host else host['ansible_host'] }}:{{ host['http_port'] if 'http_port' in host else '9200' }}"{{ ',' if not loop.last else '' }}
+  {% endif %}
+  {% endfor %}]
+service_names: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  "{{ host['service_name'] | default(host['project_name']~'-'~host['inventory_hostname']) }}"{{ ',' if not loop.last else '' }}
+  {% endfor %}]
+master_hosts: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  {% if (host['state'] is undefined or host['state'] == 'present') and (host['roles'] is undefined or 'master' in host['roles']) %}
+  "{{ host['server_host'] if 'server_host' in host else host['ansible_host'] }}{{ ':'~host['transport_port'] if 'transport_port' in host else '' }}"{{ ',' if not loop.last else '' }}
+  {% endif %}
+  {% endfor %}]
+data_hosts: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  {% if (host['state'] is undefined or host['state'] == 'present') and (host['roles'] is undefined or 'data' in host['roles']) %}
+  "{{ host['server_host'] if 'server_host' in host else host['ansible_host'] }}{{ ':'~host['transport_port'] if 'transport_port' in host else '' }}"{{ ',' if not loop.last else '' }}
+  {% endif %}
+  {% endfor %}]
+initial_master_nodes: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  {% if (host['state'] is undefined or host['state'] == 'present') and (host['roles'] is undefined or 'master' in host['roles']) %}
+  {% if host['node_name'] is undefined %}
+  "{{ [host['project_name'], host['zone'], host['inventory_hostname'], host['ansible_hostname']] | select('defined') | select('ne', '') | join('-') }}"{{ ',' if not loop.last else '' }}
+  {% else %}
+  "{{ host['node_name'] }}"{{ ',' if not loop.last else '' }}
+  {% endif %}
+  {% endif %}
+  {% endfor %}]
+exclude_hosts: >-
+  [{% for host in (groups['elasticsearch'] | map('extract', hostvars) | list) %}
+  {% if (host['state'] is defined and host['state'] in ['absent', 'stopped']) and (host['roles'] is undefined or 'data' in host['roles']) %}
+  "{{ host['node_name'] | default([host['project_name'], host['zone'], host['inventory_hostname'], host['ansible_hostname']] | select('defined') | select('ne', '') | join('-')) }}"{{ ',' if not loop.last else '' }}
+  {% endif %}
+  {% endfor %}]
+
+minimum_master_nodes: "{{ master_hosts | length // 2 + 1 }}"
+gateway_expected_nodes: "{{ (master_hosts + data_hosts) | length}}"
+gateway_recovery_nodes: "{{ data_hosts | length }}"
+

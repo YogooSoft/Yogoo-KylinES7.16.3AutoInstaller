@@ -1,0 +1,43 @@
+[all:vars]
+ansible_user=ec2-user
+ansible_ssh_private_key_file=~/.ssh/es.pem
+
+[elasticsearch:vars]
+version=6.8.6
+project_name=my_project
+config={'action':{'destructive_requires_name': 'true'}}                           # 自定义设置
+
+[elasticsearch:children]
+elasticsearch-master
+elasticsearch-data
+elasticsearch-coordinating
+
+[elasticsearch-master:vars]
+roles=['master']
+jvm_heap_memory=128m
+http_port=9201
+[elasticsearch-master]
+es-master-1  ansible_host=54.223.63.217 server_host=172.31.0.6 transport_port=9301
+es-master-2  ansible_host=52.81.195.187 server_host=172.31.1.51
+es-master-3  ansible_host=52.80.215.119 server_host=172.31.3.59
+
+[elasticsearch-data:vars]
+roles=['data']
+jvm_heap_memory=256m
+[elasticsearch-data]
+es-1  ansible_host=54.223.63.217 server_host=172.31.0.6 http_port=9202
+es-2  ansible_host=52.81.195.187 server_host=172.31.1.51 http_port=9202
+es-3  ansible_host=52.80.215.119 server_host=172.31.3.59 http_port=9202
+es-4  ansible_host=54.223.63.217 server_host=172.31.0.6 http_port=9203
+es-5  ansible_host=52.81.195.187 server_host=172.31.1.51 http_port=9203
+es-6  ansible_host=52.80.215.119 server_host=172.31.3.59 http_port=9203
+
+[elasticsearch-coordinating:vars]
+roles=['coordinating']
+jvm_heap_memory=128m
+http_port=9200
+[elasticsearch-coordinating]
+es-coordinating-1  ansible_host=54.223.63.217  server_host=172.31.0.6
+es-coordinating-2  ansible_host=52.81.195.187  server_host=172.31.1.51
+es-coordinating-3  ansible_host=52.80.215.119  server_host=172.31.3.59
+

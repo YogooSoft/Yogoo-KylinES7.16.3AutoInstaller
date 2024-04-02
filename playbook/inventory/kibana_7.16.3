@@ -1,0 +1,21 @@
+[all:vars]
+download_url=http://172.168.0.125:8080/elk
+supervisor_download_url=http://172.168.0.125:8080/elk
+version=7.16.3
+project_name=cluster_testarm
+path_base=/opt/elk
+supervisor_use_systemd=true
+running_user=elk
+url_username=elk
+url_password=elk@20210401
+kibana_username=kibana
+kibana_password=VuXUkZVPt6kn
+xpack_security=true
+
+[kibana:vars]
+es_hosts=['http://172.168.0.133:9200', 'http://172.168.0.134:9200']
+server_host=0.0.0.0
+server_port=15601
+
+[kibana]
+kibana ansible_host=172.168.0.126

@@ -1,0 +1,7 @@
+- name: Check node running
+  when: state == 'present'
+  shell: "curl -k -u '{{ es_exec_username }}:{{ es_exec_password }}' -m 10 '{{ es_address }}'"
+  register: response
+  until: response.stdout.find('You Know, for Search') != -1
+  retries: 30
+  delay: 2

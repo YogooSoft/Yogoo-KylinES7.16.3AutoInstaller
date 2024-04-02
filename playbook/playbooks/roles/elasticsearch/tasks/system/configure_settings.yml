@@ -1,0 +1,51 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+## Configuring system settings
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html
+
+# /etc/sysctl.conf
+- name: Config vm.swappiness
+  sysctl:
+    name: vm.swappiness
+    value: "{{ vm_swappiness }}"
+    state: present
+
+- name: Config vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: "{{ vm_max_map_count }}"
+    state: present
+
+# /etc/security/limits.conf
+- name: Config nofile limits
+  pam_limits:
+    domain: "{{ running_user | default(ansible_user_id) }}"
+    limit_type: "-"
+    limit_item: nofile
+    value: "{{ nofile_limit }}"
+
+- name: Config memlock limits
+  pam_limits:
+    domain: "{{ running_user | default(ansible_user_id) }}"
+    limit_type: "-"
+    limit_item: memlock
+    value: "{{ memlock_limit }}"
+
+- name: Config nproc limits
+  pam_limits:
+    domain: "{{ running_user | default(ansible_user_id) }}"
+    limit_type: "-"
+    limit_item: nproc
+    value: "{{ nproc_limit }}"

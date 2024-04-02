@@ -1,0 +1,13 @@
+[Unit]
+Description=Supervisor
+
+[Service]
+User={{ ansible_user_id }}
+ExecStart=/usr/bin/supervisord -c {{ supervisor_path_home }}/supervisord.conf
+Restart=always
+LimitNOFILE=65535
+LimitNPROC=65535
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

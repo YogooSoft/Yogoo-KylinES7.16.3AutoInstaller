@@ -1,0 +1,46 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+- block:
+    - name: Security action check
+      fail: msg="unknown security action keyword {{ security_item.action }}"
+      when: security_item.action not in ['change-password', 'upsert-user', 'upsert-role']
+      loop: "{{ security_payloads }}"
+      loop_control:
+        loop_var: security_item
+
+    - name: Security index existence check
+      shell: "curl -k -s -m 10 -u '{{ es_exec_username }}:{{ es_exec_password }}' {{ es_address }}/_cat/indices/.security"
+      register: response
+      retries: 60
+      delay: 2
+      until: response.stdout.find('.security') != -1 and response.stdout.find('security_exception') == -1
+
+    - name: Set if initialized security
+      set_fact:
+        security_inited: "{{ response.stdout.find('index_not_found_exception') == -1 }}"
+
+    - name: Set security to output
+      when: not (security_init|bool and security_inited|bool)
+      set_fact:
+        output: "{{ output + ['', '##########################', '# username and passwords #', '##########################'] }}"
+
+    - include_tasks: "action-{{ security_item.action }}.yml"
+      when: not (security_init|bool and security_inited|bool)
+      loop: "{{ security_payloads }}"
+      loop_control:
+        loop_var: security_item
+
+  when: security_payloads|length > 0 and xpack|bool and xpack_security|bool and run_once_on_present
+  any_errors_fatal: true

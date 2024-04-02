@@ -1,0 +1,13 @@
+[Unit]
+Description=Process Monitoring and Control Daemon
+After=rc-local.service nss-user-lookup.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/supervisord -c {{ supervisor_path_home }}/supervisord.conf
+LimitNOFILE=100000
+LimitNPROC=100000
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

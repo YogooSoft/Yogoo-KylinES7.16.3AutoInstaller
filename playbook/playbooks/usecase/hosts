@@ -1,0 +1,54 @@
+[all:vars]
+ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_user=centos
+ansible_become=true
+version=7.9.2
+project_name=my_project
+xpack_security=true
+running_user=elk
+supervisor_use_systemd=true
+
+
+[elasticsearch:vars]
+jvm_heap_memory=256m
+[elasticsearch]
+es-1  ansible_host=52.80.200.245 server_host=172.31.18.164 http_port=9200 transport_port=9300
+es-2  ansible_host=54.223.254.66 server_host=172.31.19.30 http_port=9200 transport_port=9300
+es-3  ansible_host=52.81.186.18 server_host=172.31.24.67 http_port=9200 transport_port=9300
+
+[repositories]
+#10.0.0.1  repositories='[{"url":"git@gitee.com:LeonJ/inventories.git", "dir":"/var/www/xxxx"}]'
+
+[logstash:vars]
+jvm_heap_memory=256m
+pipelines=[{"pipeline.id":"main"}]
+pipelines_download_url=http://127.0.0.1:8888/
+path_heap_dump=/home/centos/dump
+[logstash]
+ls-1  ansible_host=52.80.200.245
+#ls-2  ansible_host=52.80.26.34
+#ls-3  ansible_host=54.223.134.121
+
+[kibana]
+kib1  ansible_host=52.80.200.245 server_host=172.31.29.246
+
+[beats:vars]
+config_download_url=http://172.31.27.30:8000/inventories
+[beats]
+fb1  ansible_host=52.81.80.137 config=my-filebeat-config
+
+[zookeeper:vars]
+version=3.5.8
+[zookeeper]
+zk1  ansible_host=52.80.200.245 server_host=172.31.18.164
+zk2  ansible_host=54.223.254.66 server_host=172.31.19.30
+zk3  ansible_host=52.81.186.18  server_host=172.31.24.67
+
+[kafka:vars]
+version=2.12-2.3.1
+jvm_heap_memory=256m
+[kafka]
+kafka1  ansible_host=52.80.200.245 server_host=172.31.18.164
+kafka2  ansible_host=54.223.254.66 server_host=172.31.19.30
+kafka3  ansible_host=52.81.186.18  server_host=172.31.24.67

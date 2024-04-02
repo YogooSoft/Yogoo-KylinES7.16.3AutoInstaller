@@ -1,0 +1,53 @@
+# 注意： project_name 和 inventory_hostname( 第一列 ) 不能随意修改
+
+[all:vars]
+project_name=my_project
+ansible_user=ec2-user
+ansible_ssh_private_key_file=~/.ssh/es.pem
+
+[elasticsearch:vars]
+version=6.8.6
+config={}                               # 自定义设置
+#path_base=/home/ec2-user/                 # 安装部署根目录，不设置则默认使用用户的 home 目录
+#node name 自动拼接规则: {project_name}-{zone}-{inventory_hostname}-{hostname}, 为每个 host 设置 node_name 变量来自定义
+jvm_heap_memory=128m
+
+[elasticsearch:children]
+elasticsearch-master
+elasticsearch-data
+elasticsearch-coordinating
+
+[elasticsearch-master:vars]
+roles=['master']
+[elasticsearch-master]
+es-master-1  ansible_host=52.81.95.93 server_host=172.31.0.6   http_port=9201 transport_port=9301
+es-master-2  ansible_host=52.80.140.137 server_host=172.31.1.51  http_port=9201 transport_port=9301
+es-master-3  ansible_host=52.81.65.222 server_host=172.31.3.59  http_port=9201 transport_port=9301
+
+[elasticsearch-data:vars]
+roles=['data']
+[elasticsearch-data]
+es-data-1  ansible_host=52.81.95.93  server_host=172.31.0.6  box_type=hot   zone=z1  http_port=9202 transport_port=9302  path_data='["/home/ec2-user/data1","/home/ec2-user/data2"]'
+es-data-2  ansible_host=52.81.95.93  server_host=172.31.0.6  bot_type=hot   zone=z1  http_port=9203 transport_port=9303
+es-data-3  ansible_host=52.80.140.137  server_host=172.31.1.51 bot_type=warm  zone=z2  http_port=9202 transport_port=9302
+es-data-4  ansible_host=52.80.140.137  server_host=172.31.1.51 bot_type=warm  zone=z2  http_port=9203 transport_port=9303
+es-data-5  ansible_host=52.81.65.222  server_host=172.31.3.59 bot_type=warm  zone=z3  http_port=9202 transport_port=9302
+es-data-6  ansible_host=52.81.65.222  server_host=172.31.3.59 bot_type=warm  zone=z3  http_port=9203 transport_port=9303
+
+[elasticsearch-coordinating:vars]
+roles=['coordinating']
+[elasticsearch-coordinating]
+es-coordinating-1  ansible_host=52.81.95.93  server_host=172.31.0.6  http_port=9200 transport_port=9300
+es-coordinating-2  ansible_host=52.80.140.137  server_host=172.31.1.51 http_port=9200 transport_port=9300
+es-coordinating-3  ansible_host=52.81.65.222  server_host=172.31.3.59 http_port=9200 transport_port=9300
+
+[logstash:vars]
+jvm_heap_memory=64m
+pipelines=[{"pipeline.id":"main"}]
+[logstash]
+ls-1  ansible_host=52.81.95.93
+ls-2  ansible_host=52.80.140.137
+ls-3  ansible_host=52.81.65.222
+ls-4  ansible_host=52.81.95.93
+ls-5  ansible_host=52.80.140.137
+ls-6  ansible_host=52.81.65.222

@@ -1,0 +1,21 @@
+- hosts: "{{ hosts | default('all') }}"
+  tasks:
+    - command: lsblk
+      register: disk
+    - name: inspect
+      vars:
+        msg: |
+          IP: {{ ansible_host }}
+          Hostname: {{ ansible_hostname }}
+          Time: {{ ansible_date_time.iso8601 }}
+          CPU: {{ ansible_processor_cores }} Cores {{ ansible_processor_count }} Count
+          RAM: {{ ansible_memtotal_mb }} MB
+          Architecture: {{ ansible_architecture }}
+          Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }} {{ ansible_distribution_release }}
+#          Kernel: {{ ansible_kernel }}
+#          All Interface List: {{ ansible_interfaces }}
+#          All IP: {{ ansible_all_ipv4_addresses }}
+#          Gateway: {{ ansible_default_ipv4.gateway }}
+#          Eth0 MAC: {{ ansible_eth0.macaddress }}
+      debug:
+        msg: "{{ msg.split('\n') + disk.stdout.split('\n') }}"

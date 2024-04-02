@@ -1,0 +1,75 @@
+[all:vars]  
+version=7.16.3 
+project_name=cluster_testarm
+download_url=http://172.168.0.125:8080/elk  
+supervisor_download_url=http://172.168.0.125:8080/elk 
+
+# If password free login between servers is set, ignore the following section
+ansible_ssh_user=root
+ansible_ssh_port=22
+ansible_ssh_pass="Datalake1!++"
+#Set the ES startup user and ES directory
+running_user=elk
+url_username=elk
+url_password=elk@20210401  
+path_base=/opt/elk
+
+supervisor_use_systemd=true  
+xpack_security=true 
+
+# Set the Cert certificate period (default: 2 years)
+ca_days=730
+
+plugins=[{"name": "analysis-ik", "url": "file:///opt/elk/tmp/elasticsearch-analysis-ik-7.16.3.zip"}]
+# {"name" : "analysis-pinyin","url":"file:///opt/elk/tmp/elasticsearch-analysis-pinyin-7.16.3.zip"}
+# Upload JVM files to the file server
+template_settings=[{"url": "http://172.168.0.125:8080/elk/jvm.options", "filename": "jvm.options"}] 
+#config={"http": {"cors": {"enabled": "true", "allow-origin": "*"}}}  
+config={"http": {"cors": {"enabled": "true", "allow-origin": "*"},"compression": "true","compression_level": "9","max_content_length": "500mb","max_header_size": "64KB"},"action": {"search": {"shard_count": {"limit": "65536"}}},"cluster": {"routing": {"allocation": {"balance": {"index": "0.75f","shard": "0.75f"},"cluster_concurrent_rebalance": "16","enable": "all","allow_rebalance": "always","node_concurrent_incoming_recoveries": "16","node_concurrent_outgoing_recoveries": "16","node_initial_primaries_recoveries": "16","same_shard": {"host": "true"}}}},"indices": {"recovery": {"max_bytes_per_sec": "5000mb"}}} 
+[elasticsearch-master:vars]  
+http_port=9200
+transport_port=9300  
+roles=["master"]  
+jvm_heap_memory=2g  
+  
+[elasticsearch-data:vars]  
+roles=["data"，"ingest"]  
+jvm_heap_memory=2g  
+  
+[elasticsearch-coordinating:vars]  
+http_port=9200
+transport_port=9300  
+roles=["coordinating"]  
+jvm_heap_memory=2g  
+  
+[elasticsearch:children]  
+elasticsearch-master  
+elasticsearch-data  
+elasticsearch-coordinating  
+  
+[elasticsearch-master]  
+node-126-master ansible_host=172.168.0.126 node_name=node-126-master path_data=/data/data126/elasticsearch/node-126-master_data  path_logs=/data/elasticsearch/logs/node-126-master
+
+node-127-master ansible_host=172.168.0.127 node_name=node-127-master path_data=/data/data127/elasticsearch/node-127-master_data  path_logs=/data/elasticsearch/logs/node-127-master
+
+node-128-master ansible_host=172.168.0.128 node_name=node-128-master path_data=/data/data128/elasticsearch/node-128-master_data  path_logs=/data/elasticsearch/logs/node-128-master
+
+[elasticsearch-data]  
+node-129-data ansible_host=172.168.0.129 node_name=node-129-data path_data=/data/elasticsearch/node-129-data  path_logs=/data/elasticsearch/logs/node-129-data http_port=9201 transport_port=9301 jvm_heap_memory=1g 
+node-129-data-02 ansible_host=172.168.0.129 node_name=node-129-data-02 path_data=/data/elasticsearch/node-129-data-02 path_logs=/data/elasticsearch/logs/node-129-data-02 http_port=9202 transport_port=9302 jvm_heap_memory=1g
+
+node-130-data ansible_host=172.168.0.130 node_name=node-130-data path_data=/data/elasticsearch/node-130-data  path_logs=/data/elasticsearch/logs/node-130-data http_port=9201 transport_port=9301 jvm_heap_memory=1g
+node-130-data-02 ansible_host=172.168.0.130 node_name=node-130-data-02 path_data=/data/elasticsearch/node-130-data-02  path_logs=/data/elasticsearch/logs/node-130-data-02 http_port=9202 transport_port=9302 jvm_heap_memory=1g
+
+node-131-data ansible_host=172.168.0.131 node_name=node-131-data path_data=/data/elasticsearch/node-131-data  path_logs=/data/elasticsearch/logs/node-131-data http_port=9201 transport_port=9301 jvm_heap_memory=1g
+node-131-data-02 ansible_host=172.168.0.131 node_name=node-131-data-02 path_data=/data/elasticsearch/node-131-data-02  path_logs=/data/elasticsearch/logs/node-131-data-02 http_port=9202 transport_port=9302 jvm_heap_memory=1g
+	
+node-132-data ansible_host=172.168.0.132 node_name=node-132-data path_data=/data/elasticsearch/node-132-data  path_logs=/data/elasticsearch/logs/node-132-data
+
+
+	
+[elasticsearch-coordinating]  
+node-133-coord ansible_host=172.168.0.133 node_name=node-133-coord path_data=/data/elasticsearch/node-133-coord_data  path_logs=/data/elasticsearch/logs/node-133-coord
+
+node-134-coord ansible_host=172.168.0.134 node_name=node-134-coord path_data=/data/elasticsearch/node-134-coord_data  path_logs=/data/elasticsearch/logs/node-134-coord
+

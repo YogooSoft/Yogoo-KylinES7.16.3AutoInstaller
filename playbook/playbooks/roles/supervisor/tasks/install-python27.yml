@@ -1,0 +1,160 @@
+---
+#===============================================================================================
+#
+#  悦高软件-- ansible ELK 部署 Playbook
+#
+#  版权所有（c）2020-2024 上海悦高软件股份有限公司,保留所有权利。
+#-----------------------------------------------------------------------------------------------
+#  建立日期：2019-09-10
+#
+#  版 本 号：V1.5.2           更新日期:2024-03-05
+#
+#
+#===============================================================================================
+
+- name: "Check python2.7 environment"
+  # when: run_once_per_host
+  command: "whereis python2"
+  register: python_version
+
+- name: "Show python2.7 version"
+  when: python_version.stdout.find('python2.7') == -1
+  debug:
+    msg: "Python2.7 not installed"
+
+
+- name: "Download dwz-0.13-1.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/dwz-0.13-1.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/dwz-0.13-1.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download efi-srpm-macros-4-4.p01.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/efi-srpm-macros-4-4.p01.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/efi-srpm-macros-4-4.p01.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download glibc-devel-2.28-88.p09.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/glibc-devel-2.28-88.p09.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/glibc-devel-2.28-88.p09.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download kernel-headers-4.19.90-52.33.v2207.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/kernel-headers-4.19.90-52.33.v2207.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/kernel-headers-4.19.90-52.33.v2207.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download kylin-rpm-config-30-18.p06.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/kylin-rpm-config-30-18.p06.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/kylin-rpm-config-30-18.p06.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download libattr-devel-2.4.48-15.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/libattr-devel-2.4.48-15.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/libattr-devel-2.4.48-15.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download libkysec-devel-3.3.6-33.se.26.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/libkysec-devel-3.3.6-33.se.26.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/libkysec-devel-3.3.6-33.se.26.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download libsecurity1-devel-1.1-17.se.07.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/libsecurity1-devel-1.1-17.se.07.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/libsecurity1-devel-1.1-17.se.07.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download libxcrypt-devel-4.4.16-2.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/libxcrypt-devel-4.4.16-2.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/libxcrypt-devel-4.4.16-2.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python2-2.7.18-1.se.05.p03.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/python2-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python2-debug-2.7.18-1.se.05.p03.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-debug-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/python2-debug-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python2-devel-2.7.18-1.se.05.p03.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-devel-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/python2-devel-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python2-help-2.7.18-1.se.05.p03.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-help-2.7.18-1.se.05.p03.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/python2-help-2.7.18-1.se.05.p03.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download python2-pip-20.2.2-6.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-pip-20.2.2-6.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/python2-pip-20.2.2-6.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download python2-setuptools-44.1.1-2.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-setuptools-44.1.1-2.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/python2-setuptools-44.1.1-2.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download python2-tkinter-2.7.18-1.se.05.p03.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-tkinter-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/python2-tkinter-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python2-tools-2.7.18-1.se.05.p03.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python2-tools-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/python2-tools-2.7.18-1.se.05.p03.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Download python3-rpm-generators-9-1.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/python3-rpm-generators-9-1.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/python3-rpm-generators-9-1.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download qt5-srpm-macros-5.14.2-1.ky10.noarch"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/qt5-srpm-macros-5.14.2-1.ky10.noarch.rpm"
+    dest: "{{ path_public_packages }}/qt5-srpm-macros-5.14.2-1.ky10.noarch.rpm"
+    mode: '0711'
+- name: "Download tk-8.6.10-2.ky10.x86_64"
+  when: python_version.stdout.find('python2.7') == -1
+  get_url:
+    url: "{{ supervisor_download_url }}/tk-8.6.10-2.ky10.x86_64.rpm"
+    dest: "{{ path_public_packages }}/tk-8.6.10-2.ky10.x86_64.rpm"
+    mode: '0711'
+- name: "Install python2.7"
+  when: python_version.stdout.find('python2.7') == -1
+  command: "rpm -ivh {{ path_public_packages }}/*.rpm --nodeps --force"
+  register: python_install
+
+- name: "Check python2.7 install environment"
+  when: python_install
+  command: "whereis python2"
+  register: python_version_install
+
+- name: "Show python2.7 install  version"
+  when: python_version_install
+  debug:
+    msg: "Python2.7 install success"
+
