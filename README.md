@@ -394,4 +394,4 @@ PUT _cluster/settings
 
 ```
 # 技术支持：ES-Ansible 交流群
-<img src="images/yogoo-es-ansible-qq.jpg" >
+<img src="images/yogoo-es-ansible-qq.jpg" width=60%>
