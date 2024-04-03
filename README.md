@@ -5,10 +5,10 @@
    银河麒麟V10-SP3 X86架构机器专用
 # 前期准备
 * 服务器要求：银河麒麟V10-SP3 X86架构
-* ansible服务器一台【172.168.0.125】
-* ES master节点服务器若干
-* ES data节点服务器若干
-* ES coordinating节点服务器若干
+* ansible服务器1台【172.168.0.125】
+* ES master节点服务器3台
+* ES data节点服务器4台
+* ES coordinating节点服务器2台
 * root权限
 
 # 服务器节点分配示例
