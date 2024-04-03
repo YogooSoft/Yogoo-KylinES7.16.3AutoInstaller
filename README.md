@@ -394,5 +394,4 @@ PUT _cluster/settings
 
 ```
 # 技术支持：ES-Ansible 交流群
-![image](https://raw.githubusercontent.com/YogooSoft/Yogoo-KylinES7.16.3AutoInstaller/main/images/yogoo-es-ansible-qq.jpg?token=GHSAT0AAAAAACQNGKLGRFDPMUS4HOBTRXTMZQMWR3A)
-<img src="images/yogoo-es-ansible-qq.jpg" width=20%>
+<img src="images/yogoo-es-ansible-qq.jpg" width=50%>
