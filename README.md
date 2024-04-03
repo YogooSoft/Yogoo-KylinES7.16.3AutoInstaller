@@ -393,5 +393,5 @@ PUT _cluster/settings
 }
 
 ```
-# 技术支持：ES-Ansible 交流群
+# ES-Ansible 交流QQ群
 <img src="images/yogoo-es-ansible-qq.jpg" width=30%>
