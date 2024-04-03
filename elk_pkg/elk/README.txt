@@ -1,3 +1,4 @@
+# 下载文件包，可以在ES-Ansible 交流群中提供下载
 dwz-0.13-1.ky10.x86_64.rpm
 efi-srpm-macros-4-4.p01.ky10.noarch.rpm
 elasticsearch-7.16.3-linux-x86_64.tar.gz

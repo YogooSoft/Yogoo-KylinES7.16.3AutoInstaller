@@ -393,3 +393,5 @@ PUT _cluster/settings
 }
 
 ```
+# 技术支持：ES-Ansible 交流群
+![image](https://github.com/YogooSoft/Yogoo-KylinES7.16.3AutoInstaller/tree/main/images/yogoo-es-ansible-qq.jpg)
