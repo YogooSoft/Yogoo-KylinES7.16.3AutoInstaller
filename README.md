@@ -30,25 +30,25 @@
 * 工作目录结构
 ```text
 Yogoo-KylinES7.16.3AutoInstaller
-├─ ansible_install.sh # ansible一键安装脚本
-├─ elk_pkg # ES部署相关安装包
+├─ ansible_install.sh                      # ansible一键安装脚本
+├─ elk_pkg                                 # ES部署相关安装包
 │  └─ elk
-│     └─ README.txt # 需要的安装包列表，可前往交流群下载
-├─ playbook # ansible剧本文件
-│  ├─ inventory  # ansible剧本配置文件
-│  │  ├─ all # 配置节点ip及别名
-│  │  ├─ es_7.16.3 # ES安装基础配置文件
-│  │  ├─ es_7.16.3_add # ES安装扩容配置文件
-│  │  ├─ es_7.16.3_more # ES安装单机多实例配置文件
-│  │  └─ kibana_7.16.3 # kibana安装配置文件
-│  ├─ playbooks # ansible剧本目录
-│  │  ├─ roles # 各安装项剧本
-│  │  │  ├─ elasticsearch # ES安装相关剧本
-│  │  │  ├─ kibana # kibana安装相关剧本
-│  │  │  └─ supervisor # supervisor安装相关剧本
-│  └─ script_bash # 剧本一键执行脚本
-├─ portable-ansible-v0.4.0-py3.tar.bz2 # ansible离线包
-└─ soft_pkg # 部署所需相关程序安装包
+│     └─ README.txt                        # 需要的安装包列表，可前往交流群下载
+├─ playbook                                # ansible剧本文件
+│  ├─ inventory                            # ansible剧本配置文件
+│  │  ├─ all                               # 配置节点ip及别名
+│  │  ├─ es_7.16.3                         # ES安装基础配置文件
+│  │  ├─ es_7.16.3_add                     # ES安装扩容配置文件
+│  │  ├─ es_7.16.3_more                    # ES安装单机多实例配置文件
+│  │  └─ kibana_7.16.3                     # kibana安装配置文件
+│  ├─ playbooks                            # ansible剧本目录
+│  │  ├─ roles                             # 各安装项剧本
+│  │  │  ├─ elasticsearch                  # ES安装相关剧本
+│  │  │  ├─ kibana                         # kibana安装相关剧本
+│  │  │  └─ supervisor                     # supervisor安装相关剧本
+│  └─ script_bash                          # 剧本一键执行脚本
+├─ portable-ansible-v0.4.0-py3.tar.bz2     # ansible离线包
+└─ soft_pkg                                # 部署所需相关程序安装包
 ```
     
 ## 步骤2：文件下载服务配置
@@ -61,7 +61,7 @@ systemctl stop firewalld
 # 启动文件下载服务
 cd /root/yogoo_es_ansible/elk_pkg   
 nohup python3 -m http.server 8080 &
-# 浏览器访问服务器ip对应地址，即可查看到/root/yogoo_es_ansible/elk_pkg/elk目录下文件
+# 浏览器访问服务器ip对应地址，即可查看到 /root/yogoo_es_ansible/elk_pkg/elk 目录下文件
 http://172.168.0.125:8080/elk
 ```
 ## 步骤3：机器之间的免密配置
@@ -119,7 +119,7 @@ logout
 cd /root/yogoo_es_ansible
 # ansible_install.sh 增加可执行权限
 chmod +x ansible_install.sh
-# 执行安装ansible脚本
+# 执行安装 ansible 脚本
 ./ansible_install.sh
 source /etc/profile
 ```
