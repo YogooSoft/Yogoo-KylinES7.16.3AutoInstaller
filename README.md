@@ -29,12 +29,26 @@
 * 创建目录/root/yogoo_es_ansible
 * 工作目录结构
 ```text
-/root/yogoo_es_ansible/
-    |--- elk_pkg/   # ES部署相关安装包
-    |--- playbook/  # ansible剧本文件
-    |--- soft_pkg/  # 部署所需相关程序安装包
-    |--- ansible_install.sh  # ansible一键安装脚本
-    |--- portable-ansible-v0.4.0-py3.tar.bz2  # ansible安装包
+Yogoo-KylinES7.16.3AutoInstaller
+├─ ansible_install.sh # ansible一键安装脚本
+├─ elk_pkg # ES部署相关安装包
+│  └─ elk
+│     └─ README.txt # 需要的安装包列表，可前往交流群下载
+├─ playbook # ansible剧本文件
+│  ├─ inventory  # ansible剧本配置文件
+│  │  ├─ all # 配置节点ip及别名
+│  │  ├─ es_7.16.3 # ES安装基础配置文件
+│  │  ├─ es_7.16.3_add # ES安装扩容配置文件
+│  │  ├─ es_7.16.3_more # ES安装单机多实例配置文件
+│  │  └─ kibana_7.16.3 # kibana安装配置文件
+│  ├─ playbooks # ansible剧本目录
+│  │  ├─ roles # 各安装项剧本
+│  │  │  ├─ elasticsearch # ES安装相关剧本
+│  │  │  ├─ kibana # kibana安装相关剧本
+│  │  │  └─ supervisor # supervisor安装相关剧本
+│  └─ script_bash # 剧本一键执行脚本
+├─ portable-ansible-v0.4.0-py3.tar.bz2 # ansible离线包
+└─ soft_pkg # 部署所需相关程序安装包
 ```
     
 ## 步骤2：文件下载服务配置
