@@ -38,6 +38,9 @@
           - install
           - plugin
           - configure
-          - security
+          # - security
+          - temp-user/create
+          - check
+          - temp-user/clear
         action: stop
 

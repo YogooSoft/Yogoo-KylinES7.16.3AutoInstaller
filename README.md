@@ -86,7 +86,7 @@ vi /etc/hosts
 安装sshpass 用于配置服务免密登录
 ```shell
 cd /root/yogoo_es_ansible/soft_pkg   
-yum localinstall -y sshpass-1.06-8.ky10.x86_64.rpm
+rpm -ivh sshpass-1.06-8.ky10.x86_64.rpm
 sshpass -V
 ```
 ### 3.3 配置免密登录
@@ -128,8 +128,35 @@ source /etc/profile
 # 版本：2.9.0
 ansible --version
 ```
-## 步骤5：ES部署
-### 5.1 剧本执行脚本增加执行权限
+
+## 步骤5：服务器时间同步
+### 5.1 检查各服务器系统时间
+在各服务器执行查看系统时间命令，如各服务器时间不一致，需进行时间同步
+```shell
+date +"%F %T"
+```
+### 5.2 服务器系统时间同步
+在各服务器执行查看系统时间命令，如各服务器时间不一致，需进行时间同步
+```shell
+cd /root/yogoo_es_ansible/playbook/inventory
+# 编辑all文件，内容如下
+vi all
+es126 ansible_host=172.168.0.126
+es127 ansible_host=172.168.0.127
+es128 ansible_host=172.168.0.128
+es129 ansible_host=172.168.0.129
+es130 ansible_host=172.168.0.130
+es131 ansible_host=172.168.0.131
+es132 ansible_host=172.168.0.132
+es133 ansible_host=172.168.0.133
+es134 ansible_host=172.168.0.134
+
+# 执行系统时间同步 -i后跟要执行的服务器，多个服务用“,”隔开
+ansible all -i 172.168.0.126,172.168.0.127,172.168.0.128,172.168.0.129,172.168.0.130,172.168.0.131,172.168.0.132,172.168.0.133,172.168.0.134 -m shell -a "date -s '2024-06-03 10:43:00'"
+```
+
+## 步骤6：ES部署
+### 6.1 剧本执行脚本增加执行权限
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 chmod +x do_elasticsearch-setup.sh
@@ -142,7 +169,7 @@ chmod +x do_destroy.sh
 chmod +x do_elasticsearch-add-cert.sh
 chmod +x do_kibana-setup.sh
 ```
-### 5.2 ES配置文件编辑
+### 6.2 ES配置文件编辑
 ES配置文件位置：/root/yogoo_es_ansible/playbook/inventory
 ```shell
 cd /root/yogoo_es_ansible/playbook/inventory
@@ -154,7 +181,7 @@ plugins=[{"name": "analysis-ik", "url": "file:///opt/elk/tmp/elasticsearch-analy
 # 节点服务器配置
 根据实际情况配置服务器ip、节点名称
 ```
-### 5.3 执行剧本
+### 6.3 执行剧本
 执行脚本安装ES-7.16.3，安装结束务必记录输出的es相关登录账号和密码
 
 脚本位置：/root/yogoo_es_ansible/playbook/script_bash
@@ -195,47 +222,47 @@ ok: [node-126-master] => {
     ]
 }
 ```
-### 5.4 查看节点
+### 6.4 查看节点
 ```shell
 # 浏览器访问查看节点
 # 账号密码：elastic/t1F******0o8
 http://172.168.0.126:9200/_cat/nodes
 ```
-### 5.5 注意事项
+### 6.5 注意事项
 各服务器确保系统时间一致，否则会引发服务器证书错误。
-## 步骤6：常用剧本测试
+## 步骤7：常用剧本测试
 脚本参数说明
 * -i 指定使用的ES配置文件
 * -s 指定需要执行节点名称，多个节点名称使用英文逗号隔开
 * -h 指定host读取文件，仅用于集群销毁脚本
 
-### 6.1 测试扩容集群
+### 7.1 测试扩容集群
 ```shell
 # 注意：扩容的集群需要在ES配置文件中配置
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-setup.sh -i es_7.16.3_add -s node-132-data,node-133-coord,node-134-coord
 ```
-### 6.2 测试滚动重启
+### 7.2 测试滚动重启
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-rolling-reconfigure.sh -i es_7.16.3_add
 ```
-### 6.3 测试全面重启
+### 7.3 测试全面重启
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-full-reconfigure.sh -i es_7.16.3_add
 ```
-### 6.4 测试仅停止集群
+### 7.4 测试仅停止集群
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-stop-all.sh -i es_7.16.3_add
 ```
-### 6.5 测试仅启动集群
+### 7.5 测试仅启动集群
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-start-all.sh -i es_7.16.3_add
 ```
-### 6.6 测试节点下线
+### 7.6 测试节点下线
 ```shell
 # 将节点从集群路由策略中排除（适用于持续写入ES集群）
 curl -X PUT -H "Content-Type: application/json" -u "elastic:t1F******0o8"  http://172.168.0.126:9200/_cluster/settings -d '
@@ -258,7 +285,7 @@ curl -X GET -u "elastic:t1F******0o8"  http://172.168.0.126:9200/_cat/nodes?
 curl -X PUT -H "Content-Type: application/json" -u "elastic:t1F******0o8"  http://172.168.0.126:9200/_cluster/settings -d '
 {"transient" : {"cluster.routing.allocation.exclude._ip" : null}}';
 ```
-### 6.7 测试节点重新上线
+### 7.7 测试节点重新上线
 ```shell
 # 登录对应节点所在服务器，使用supervisord工具启动es节点服务 查看当前es服务状态及es服务名
 supervisorctl status
@@ -267,7 +294,7 @@ supervisorctl start [es服务名]
 # 等待集群green/验证集群状态是否green
 curl -u elastic:t1F******0o8 172.168.0.126:9200/_cat/health
 ```
-### 6.8 测试插件安装
+### 7.8 测试插件安装
 ```shell
 # 确认es配置文件中的配置
 vi /root/yogoo_es_ansible/playbook/inventory/es_7.16.3_add
@@ -279,7 +306,7 @@ vi /root/yogoo_es_ansible/playbook/playbooks/roles/elasticsearch/tasks/plugin/do
 bash do_elasticsearch-plugin.sh -i es_7.16.3_add
 # 验证 访问http://172.168.0.126:9200/_cat/plugins 查看各节点插件版本
 ```
-### 6.9 测试节点销毁
+### 7.9 测试节点销毁
 ```shell
 # 编辑all文件
 vi /root/yogoo_es_ansible/playbook/inventory/all
@@ -297,7 +324,7 @@ curl -X PUT -H "Content-Type: application/json" -u "elastic:t1F******0o8"  http:
 {"transient" : {"cluster.routing.allocation.exclude._ip" : null}}';
 
 ```
-### 6.10 测试证书更新
+### 7.10 测试证书更新
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_elasticsearch-add-cert.sh -i es_7.16.3_add
@@ -307,7 +334,7 @@ openssl pkcs12 -in elastic-certificates.p12 -clcerts -nodes | openssl x509 -noou
 # 浏览器访问查看
 http://172.168.0.126:9200/_ssl/certificates
 ```
-### 6.11 单服务器部署多节点
+### 7.11 单服务器部署多节点
 ```shell
 # 编辑配置文件  例：es_7.16.3_more
 vi /root/yogoo_es_ansible/playbook/inventory/es_7.16.3_more
@@ -320,8 +347,8 @@ node-131-data-02 ansible_host=172.168.0.131 node_name=node-131-data-02 path_data
 bash do_elasticsearch-setup.sh -i es_7.16.3_more -s node-131-data,node-131-data-02
 # 如果是在已部署节点服务器上新增，则需销毁服务器节点后，再执行扩容
 ```
-## 步骤7：Kibana部署
-### 7.1 kibana配置文件
+## 步骤8：Kibana部署
+### 8.1 kibana配置文件
 ```shell
 # 配置kibana_7.16.3
 vi /root/yogoo_es_ansible/playbook/inventory/kibana_7.16.3
@@ -353,13 +380,13 @@ server_port=15601
 [kibana]
 kibana ansible_host=172.168.0.126
 ```
-### 7.2 执行kibana部署脚本
+### 8.2 执行kibana部署脚本
 ```shell
 cd /root/yogoo_es_ansible/playbook/script_bash
 bash do_kibana-setup.sh -i kibana_7.16.3
 # 访问地址：http://172.168.0.126:15601/
 ```
-### 7.3 配置writer账号
+### 8.3 配置writer账号
 ```shell
 # 进入kibana 的开发工具页面执行以下命令
 PUT _security/role/writer 
@@ -380,7 +407,7 @@ PUT _security/user/writer
   "email" : "w****f@bitian.cn"  
 }
 ```
-### 7.4 启用monitoring
+### 8.4 启用monitoring
 ```shell
 # 进入kibana 的开发工具页面执行以下命令
 PUT _cluster/settings  
@@ -396,13 +423,13 @@ PUT _cluster/settings
     }  
 }
 ```
-### 7.5 启用monitoring
+### 8.5 启用monitoring
 ```shell
 # 进入kibana 的开发工具页面执行以下命令
 PUT _cluster/settings
 {  
   "persistent" : {  
-    "cluster.routing.allocation.awareness.attributes": "null"  
+    "cluster.routing.allocation.awareness.attributes": null
   }  
 }
 

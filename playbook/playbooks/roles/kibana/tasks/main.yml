@@ -39,7 +39,7 @@
   wait_for:
     host: "{{ server_host }}"
     port: "{{ server_port }}"
-    timeout: 60
+    timeout: 120
 
 - name: Check service running status
   when: ansible_play_hosts_all|map('extract', hostvars)|selectattr('ansible_host', 'eq', ansible_host)|map(attribute='inventory_hostname')|list|first == inventory_hostname
